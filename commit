@@ -1,0 +1,9 @@
+#!/bin/bash
+
+echo "Comment: " $1
+
+GIT=`which git`
+
+$GIT add .
+$GIT commit -m "$1"
+$GIT push origin master
