@@ -32,41 +32,19 @@ class AppPopupMenu:
         self.menu.popup( None, None, None, button, time)
         
 
-class AppIcon(object):
-    
-    def __init__(self, icon_path, icon_file):
-        self.icon_path=icon_path
-        self.icon_file=icon_file
-        self.curdir=os.path.abspath( os.path.dirname(__file__) )
-        self.twodirup=os.path.abspath( os.path.join(self.curdir, "..", "..") )
-    
-    def getIconPixBuf(self): 
-        try:
-            ipath=self.icon_path+"/"+self.icon_file
-            pixbuf = gtk.gdk.pixbuf_new_from_file( ipath )
-        except:
-            ipath=os.path.join(self.twodirup, self.icon_file)
-            pixbuf = gtk.gdk.pixbuf_new_from_file( ipath )
-                      
-        return pixbuf.scale_simple(24,24,gtk.gdk.INTERP_BILINEAR)
-
-
 
 class TrayAgent(object):
-    def __init__(self, app_name, icon_path, icon_file, help_url):
+    def __init__(self, app_name, help_url):
         
         self.app_name=app_name
         self.help_url=help_url
         self.popup_menu=AppPopupMenu(self)
         
         self.tray=gtk.StatusIcon()
+        self.tray.set_from_stock(gtk.STOCK_ABOUT)
         self.tray.set_visible(True)
         self.tray.set_tooltip(app_name)
-        #self.tray.connect('activate', self.do_popup_menu_activate)
         self.tray.connect('popup-menu', self.do_popup_menu)
-        
-        scaled_buf = AppIcon(icon_path, icon_file).getIconPixBuf()
-        self.tray.set_from_pixbuf( scaled_buf )
         
     def do_popup_menu_activate(self, statusIcon):
         timestamp=gtk.get_current_event_time()

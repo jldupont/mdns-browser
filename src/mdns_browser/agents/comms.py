@@ -11,6 +11,7 @@ _DNS_PORT = 53;
 _DNS_TTL = 60 * 60; # one hour default TTL
 _MAX_MSG_ABSOLUTE = 8972
 
+_SELECT_TIMEOUT=1
 
 import socket
 import select
@@ -49,18 +50,18 @@ class CommsAgent(AgentThreadedBase):
         self.socket.setsockopt(socket.SOL_IP, socket.IP_MULTICAST_IF,   socket.inet_aton('0.0.0.0'))
         self.socket.setsockopt(socket.SOL_IP, socket.IP_ADD_MEMBERSHIP, socket.inet_aton(_MDNS_ADDR) + socket.inet_aton('0.0.0.0'))
         
-    def h__tick__(self, *_):
+    def h___tick__(self, *_):
         try:
-            rr, _wr, _er = select.select(self.socket, [], [], self.timeout)
+            rr, _wr, _er = select.select([self.socket,], [], [], _SELECT_TIMEOUT)
             if rr:
                 try:
-                    data, (addr, port) = self.zeroconf.socket.recvfrom(_MAX_MSG_ABSOLUTE)
+                    data, (addr, port) = self.socket.recvfrom(_MAX_MSG_ABSOLUTE)
                     self.pub("packet", data, addr, port)
                 except Exception,e:
                     # Ignore errors that occur on shutdown
                     print e
-        except:
-            pass
+        except Exception,e:
+            print "CommsAgent: %s" %e
 
         
         
