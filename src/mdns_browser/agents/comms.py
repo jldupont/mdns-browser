@@ -11,7 +11,7 @@ _DNS_PORT = 53;
 _DNS_TTL = 60 * 60; # one hour default TTL
 _MAX_MSG_ABSOLUTE = 8972
 
-_SELECT_TIMEOUT=1
+_SELECT_TIMEOUT=0.5
 
 import socket
 import select
@@ -60,8 +60,8 @@ class CommsAgent(AgentThreadedBase):
                 except Exception,e:
                     # Ignore errors that occur on shutdown
                     print e
-        except Exception,e:
-            print "CommsAgent: %s" %e
+        except Exception, e:
+            self.pub("llog", "Receive Error: " % e)
 
         
         
