@@ -1,14 +1,19 @@
 """
     Comms Agent
     
-    Created on 2011-01-07
-
+    MESSAGES PROCESSED:
+    - "__tick__"
+    - "query"
+    
+    MESSAGES EMITTED:
+    - "packet"
+    
+    
+    @date: 2011-01-07
     @author: jldupont
 """
 _MDNS_ADDR = '224.0.0.251'
 _MDNS_PORT = 5353;
-_DNS_PORT = 53;
-_DNS_TTL = 60 * 60; # one hour default TTL
 _MAX_MSG_ABSOLUTE = 8972
 
 _SELECT_TIMEOUT=0.5
@@ -57,9 +62,8 @@ class CommsAgent(AgentThreadedBase):
                 try:
                     data, (addr, port) = self.socket.recvfrom(_MAX_MSG_ABSOLUTE)
                     self.pub("packet", data, addr, port)
-                except Exception,e:
-                    # Ignore errors that occur on shutdown
-                    print e
+                except:
+                    pass
         except Exception, e:
             self.pub("llog", "Receive Error: " % e)
 
