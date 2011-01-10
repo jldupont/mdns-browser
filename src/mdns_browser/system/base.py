@@ -194,6 +194,7 @@ class AgentThreadedBase(Thread):
         self.agent_name=str(self.__class__).split(".")[-1][:-2]
         self.responsesInterest=[]
         self.credits={}
+        self.logstats={}
         self.halting=False
         
     def dprint(self, msg):
@@ -219,6 +220,7 @@ class AgentThreadedBase(Thread):
         """
         try:    self.credits.update(credits)
         except: pass
+        self.pub("__logstats__", self.agent_name, self.id, self.logstats)
         
     def log(self, logLevel, *pargs):
         """ Logging Facility
@@ -228,6 +230,7 @@ class AgentThreadedBase(Thread):
             For starters, every logLevel gets 1 credit 
         """
         if self.credits.get(logLevel, 1) == 0:
+            self.logstats[logLevel] = self.logstats.get(logLevel, 0)+1
             return
     
         if logLevel in self.HP_LOGGING:

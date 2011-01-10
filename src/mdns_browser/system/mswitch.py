@@ -8,8 +8,9 @@
     @author: jldupont
     @date: May 17, 2010
     @revised: June 18, 2010
-    @revised: August 22, 2010 : filtered-out "send to self" case 
-    @revised: August 23, 2010 : added "snooping mode"   
+    @revised: August 22, 2010 :  filtered-out "send to self" case 
+    @revised: August 23, 2010 :  added "snooping mode"   
+    @reviseD: January 10, 2011:  added "halting" operational mode
 """
 
 from threading import Thread
@@ -37,6 +38,7 @@ class CentralSwitch(Thread):
     def __init__(self):
         Thread.__init__(self)
         
+        self.halting=False
         #self.rmap={} ## debug only
         
         self.imap={}
@@ -69,25 +71,27 @@ class CentralSwitch(Thread):
                     envelope=self.isq.get(block=False)
                     orig, mtype, payload=envelope
                     
+                    if mtype=="__halt__":
+                        self.halting=True
+                        continue
+                    
                     if mtype=="__interest__":
                         self.do_interest(payload)
-                    else:
-                        self.do_pub(orig, mtype, payload)
+                        continue
+
+                    self.do_pub(orig, mtype, payload)
                     ## We needed to give a chance to
                     ## all threads to exit before
                     ## committing "hara-kiri"
                     if mtype=="__quit__":
                         quit=True
 
-                    ## high priority messages are processed until
-                    ## exhaustion
-                    continue
                 except Empty:
                     break
     
             burst=self.LOW_PRIORITY_BURST_SIZE
             
-            while True:
+            while True and not self.halting:
                 try:            
                     ## normal priority queue            
                     envelope=self.iq.get(block=True, timeout=0.1)
@@ -98,9 +102,6 @@ class CentralSwitch(Thread):
                     else:
                         self.do_pub(orig, mtype, payload)
 
-                    if mtype=="__quit__":
-                        quit=True
-                                            
                     #if mtype != "tick":
                     #    print "mswitch: mtype(%s)" % mtype
                     
