@@ -6,12 +6,18 @@
     * message dispatching based on Agent 'interest'
     * default handler: "h_default" , catch-all messages
     * "snooping" handlers support: agent gets "envelopes" with only 'msgType'
+    * logging support: credit based, throttling at the 'source'
+    
+    
+    NOTES:
+    - The logLevel "d" (debug) is un-throttled: beware!
     
     @author: jldupont
     @date: May 17, 2010
     @revised: June 18, 2010
-    @revised: August 22, 2010 : filtered-out "send to self" case
-    @revised: August 23, 2010 : added "snooping mode", remove another message loop, tidied-up    
+    @revised: August 22, 2010 :  filtered-out "send to self" case
+    @revised: August 23, 2010 :  added "snooping mode", remove another message loop, tidied-up
+    @revised: January 10, 2011:  added 'logging' facility helper  
 """
 
 from threading import Thread
@@ -88,11 +94,13 @@ def mdispatch(obj, this_source, envelope):
     return (False, mtype, handled, snoopingHandler)
 
 
-def process_queues(src_agent, agent_name, agent_id, interest_map, responsesInterestList,
+def process_queues(halting, src_agent, agent_name, agent_id, interest_map, responsesInterestList,
                    iq, isq, processor, low_priority_burst_size=5):
     """
     Runs through both queues and calls processing on valid messages
     """
+    
+    ## HIGH PRIORITY QUEUE
     quit=False
     while True:
         try:
@@ -104,22 +112,24 @@ def process_queues(src_agent, agent_name, agent_id, interest_map, responsesInter
             continue
         except Empty:
             break
-        
 
-    burst=low_priority_burst_size
-    while True and not quit:                
-        try:
-            envelope=iq.get(block=False)#(block=True, timeout=0.1)
-            mquit=processor(src_agent, agent_name, agent_id, interest_map, responsesInterestList, iq, isq, envelope)
-            if mquit:
-                quit=True
+    ## LOW PRIORITY QUEUE
+    ##  process only if the system is not shutting down        
+    if not halting:
+        burst=low_priority_burst_size
+        while True and not quit:                
+            try:
+                envelope=iq.get(block=False)#(block=True, timeout=0.1)
+                mquit=processor(src_agent, agent_name, agent_id, interest_map, responsesInterestList, iq, isq, envelope)
+                if mquit:
+                    quit=True
+                    break
+    
+                burst -= 1
+                if burst == 0:
+                    break
+            except Empty:
                 break
-
-            burst -= 1
-            if burst == 0:
-                break
-        except Empty:
-            break
     
     return quit
     
@@ -170,6 +180,8 @@ class AgentThreadedBase(Thread):
     
     LOW_PRIORITY_BURST_SIZE=5
     
+    HP_LOGGING = ["c", "e"]
+    
     def __init__(self, debug=False):
         Thread.__init__(self)
         self.mmap={}
@@ -181,13 +193,50 @@ class AgentThreadedBase(Thread):
         
         self.agent_name=str(self.__class__).split(".")[-1][:-2]
         self.responsesInterest=[]
+        self.credits={}
+        self.halting=False
         
     def dprint(self, msg):
+        """ Simple debugging facility
+        """
         if debug:
             print "+ %s: %s" % (self.agent_name, msg)
         
     def pub(self, msgType, *pargs, **kargs):
+        """ Message Publication facility
+        """
         mswitch.publish(self.id, msgType, *pargs, **kargs)
+        
+    def h___halt__(self):
+        """ System is preparing to shutdown
+        """
+        self.halting=True
+        
+    def h_logcredits(self, credits):
+        """ Reception of logging credits
+        
+            ** Don't add credits to existing ones **
+        """
+        try:    self.credits.update(credits)
+        except: pass
+        
+    def log(self, logLevel, *pargs):
+        """ Logging Facility
+            
+            Throttles messages at the source
+            
+            For starters, every logLevel gets 1 credit 
+        """
+        if self.credits.get(logLevel, 1) == 0:
+            return
+    
+        if logLevel in self.HP_LOGGING:
+            self.pub("__log__", logLevel, *pargs)
+        else:
+            self.pub("log", logLevel, *pargs)
+            
+        if logLevel != "d" and logLevel != "D":
+            self.credits[logLevel]=self.credits.get(logLevel, 1)-1
         
     def run(self):
         """
@@ -203,7 +252,7 @@ class AgentThreadedBase(Thread):
         
         quit=False
         while not quit:
-            quit=process_queues(self, self.agent_name, self.id, 
+            quit=process_queues(self.halting, self, self.agent_name, self.id, 
                                 self.mmap, self.responsesInterest,
                                 self.iq, self.isq, message_processor)
             
