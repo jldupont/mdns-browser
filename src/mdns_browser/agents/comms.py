@@ -55,6 +55,14 @@ class CommsAgent(AgentThreadedBase):
         self.socket.setsockopt(socket.SOL_IP, socket.IP_MULTICAST_IF,   socket.inet_aton('0.0.0.0'))
         self.socket.setsockopt(socket.SOL_IP, socket.IP_ADD_MEMBERSHIP, socket.inet_aton(_MDNS_ADDR) + socket.inet_aton('0.0.0.0'))
         
+    def h_query(self, protocol_msg):
+        try:
+            _bytes_sent = self.socket.sendto(protocol_msg, 0, (_MDNS_ADDR, _MDNS_PORT))
+        except:
+            # Ignore this, it may be a temporary loss of network connection
+            pass
+        
+        
     def h___tick__(self, *_):
         try:
             rr, _wr, _er = select.select([self.socket,], [], [], _SELECT_TIMEOUT)

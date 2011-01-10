@@ -19,6 +19,7 @@ from mdns_browser.agents import sup
 from mdns_browser.agents import debug
 from mdns_browser.agents import comms
 from mdns_browser.agents import logger
+from mdns_browser.agents import querier
 from mdns_browser.system.ui_base import UiAgentBase
 
 

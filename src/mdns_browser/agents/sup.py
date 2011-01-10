@@ -28,8 +28,13 @@ class SupervisorAgent(AgentThreadedBase):
         
         if self.num_agents_started == self.num_agents_halted:
             self._pub("__quit__")
+
+    def h_log(self, logLevel, *pargs):
+
+        if logLevel == "c" or logLevel=="C":
+            self._pub("__halt__")
         
-    def h___log__(self, logLevel, _msg, *pargs):
+    def h___log__(self, logLevel,*pargs):
 
         if logLevel == "c" or logLevel=="C":
             self._pub("__halt__")

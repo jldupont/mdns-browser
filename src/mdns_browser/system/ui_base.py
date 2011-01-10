@@ -108,7 +108,7 @@ class UiAgentBase(object):
         #(src_agent, agent_name, agent_id, 
         #  interest_map, responsesInterestList, 
         #  iq, isq, processor, low_priority_burst_size=5)
-        quit=process_queues(self, "__main__", "__main__", 
+        quit=process_queues(False, self, "__main__", "__main__", 
                        self.interests, self.responsesInterests,
                        self.iq, self.isq, message_processor 
                        )
