@@ -58,6 +58,9 @@ class CentralSwitch(Thread):
         
         The system messages "__interest__" and "__quit__" are
         given special attention.
+        
+        Be sure to pass along the "__quit__" message **before**
+        the switch thread.
         """
         quit=False
         while not quit:

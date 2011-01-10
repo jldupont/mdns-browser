@@ -99,7 +99,6 @@ def process_queues(halting, src_agent, agent_name, agent_id, interest_map, respo
     """
     Runs through both queues and calls processing on valid messages
     """
-    
     ## HIGH PRIORITY QUEUE
     quit=False
     while True:
@@ -109,7 +108,6 @@ def process_queues(halting, src_agent, agent_name, agent_id, interest_map, respo
             if mquit:
                 quit=True
                 break
-            continue
         except Empty:
             break
 
@@ -206,12 +204,21 @@ class AgentThreadedBase(Thread):
     def pub(self, msgType, *pargs, **kargs):
         """ Message Publication facility
         """
+        if not self.halting:
+            mswitch.publish(self.id, msgType, *pargs, **kargs)
+
+    def _pub(self, msgType, *pargs, **kargs):
+        """ Message Publication facility
+        """
         mswitch.publish(self.id, msgType, *pargs, **kargs)
+        
         
     def h___halt__(self):
         """ System is preparing to shutdown
         """
         self.halting=True
+        self._pub("__agent__", self.agent_name, self.id, "halted")
+        print "* Agent(%s) (%s) HALTED" % (self.agent_name, self.id)
         
     def h_logcredits(self, credits):
         """ Reception of logging credits
@@ -220,7 +227,7 @@ class AgentThreadedBase(Thread):
         """
         try:    self.credits.update(credits)
         except: pass
-        self.pub("__logstats__", self.agent_name, self.id, self.logstats)
+        self._pub("__logstats__", self.agent_name, self.id, self.logstats)
         
     def log(self, logLevel, *pargs):
         """ Logging Facility
@@ -234,9 +241,9 @@ class AgentThreadedBase(Thread):
             return
     
         if logLevel in self.HP_LOGGING:
-            self.pub("__log__", logLevel, *pargs)
+            self._pub("__log__", logLevel, *pargs)
         else:
-            self.pub("log", logLevel, *pargs)
+            self._pub("log", logLevel, *pargs)
             
         if logLevel != "d" and logLevel != "D":
             self.credits[logLevel]=self.credits.get(logLevel, 1)-1
@@ -245,20 +252,22 @@ class AgentThreadedBase(Thread):
         """
         Main Loop
         """
-        print "Agent(%s) (%s) starting" % (self.agent_name, self.id)
-        
         ## subscribe this agent to all
         ## the messages of the switch.
         ## Later on when the agent starts receiving messages,
         ## it will signal which 'message types' are of interest.
         mswitch.subscribe(self.id, self.iq, self.isq)
         
+        print "Agent(%s) (%s) starting" % (self.agent_name, self.id)
+        self._pub("__agent__", self.agent_name, self.id, "started")
+        
         quit=False
         while not quit:
             quit=process_queues(self.halting, self, self.agent_name, self.id, 
                                 self.mmap, self.responsesInterest,
                                 self.iq, self.isq, message_processor)
-            
+        
+        ##self._pub("__agent__", self.agent_name, self.id, "stop")    
         print "Agent(%s) (%s) ending" % (self.agent_name, self.id)
                 
             
