@@ -35,7 +35,6 @@ class CommsAgent(AgentThreadedBase):
             ##The following doesn't work on Linux
             try:    self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
             except: pass
-            a
         except:
             self._failures.append("Socket Options: REUSEADDR")
         
