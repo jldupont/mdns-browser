@@ -117,7 +117,7 @@ class CentralSwitch(Thread):
                 except Empty:
                     break
         
-        print "* mswitch: ending"
+        #print "* mswitch: ending"
         
     def do_interest(self, args):
         """
