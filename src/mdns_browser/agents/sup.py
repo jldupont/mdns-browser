@@ -19,6 +19,7 @@ class SupervisorAgent(AgentThreadedBase):
         self.num_agents_halted=0
     
     def h___agent__(self, name, id, status):
+        ##print "SUP.h___agent__: %s, %s, %s" % (name, id, status)
         if status=="started":
             self.num_agents_started += 1
             return
@@ -28,14 +29,14 @@ class SupervisorAgent(AgentThreadedBase):
         
         if self.num_agents_started == self.num_agents_halted:
             self._pub("__quit__")
+            self.doQuit()
 
     def h_log(self, logLevel, *pargs):
 
         if logLevel == "c" or logLevel=="C":
             self._pub("__halt__")
         
-    def h___log__(self, logLevel,*pargs):
-
+    def h___log__(self, logLevel, *pargs):
         if logLevel == "c" or logLevel=="C":
             self._pub("__halt__")
             

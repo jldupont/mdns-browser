@@ -104,8 +104,8 @@ def process_queues(halting, src_agent, agent_name, agent_id, interest_map, respo
     while True:
         try:
             envelope=isq.get(block=True, timeout=0.1)
-            mquit=processor(src_agent, agent_name, agent_id, interest_map, responsesInterestList, iq, isq, envelope)
-            if mquit:
+            quit=processor(src_agent, agent_name, agent_id, interest_map, responsesInterestList, iq, isq, envelope)
+            if quit:
                 quit=True
                 break
         except Empty:
@@ -118,11 +118,7 @@ def process_queues(halting, src_agent, agent_name, agent_id, interest_map, respo
         while True and not quit:                
             try:
                 envelope=iq.get(block=False)#(block=True, timeout=0.1)
-                mquit=processor(src_agent, agent_name, agent_id, interest_map, responsesInterestList, iq, isq, envelope)
-                if mquit:
-                    quit=True
-                    break
-    
+                processor(src_agent, agent_name, agent_id, interest_map, responsesInterestList, iq, isq, envelope)
                 burst -= 1
                 if burst == 0:
                     break
@@ -194,6 +190,7 @@ class AgentThreadedBase(Thread):
         self.credits={}
         self.logstats={}
         self.halting=False
+        self.quit=False
         
     def dprint(self, msg):
         """ Simple debugging facility
@@ -248,6 +245,12 @@ class AgentThreadedBase(Thread):
         if logLevel != "d" and logLevel != "D":
             self.credits[logLevel]=self.credits.get(logLevel, 1)-1
         
+    def beforeRun(self):
+        pass
+        
+    def doQuit(self):
+        self.quit=True
+        
     def run(self):
         """
         Main Loop
@@ -258,11 +261,13 @@ class AgentThreadedBase(Thread):
         ## it will signal which 'message types' are of interest.
         mswitch.subscribe(self.id, self.iq, self.isq)
         
+        getattr(self, "beforeRun")()
+        
         print "Agent(%s) (%s) starting" % (self.agent_name, self.id)
         self._pub("__agent__", self.agent_name, self.id, "started")
         
         quit=False
-        while not quit:
+        while not self.quit and not quit:
             quit=process_queues(self.halting, self, self.agent_name, self.id, 
                                 self.mmap, self.responsesInterest,
                                 self.iq, self.isq, message_processor)

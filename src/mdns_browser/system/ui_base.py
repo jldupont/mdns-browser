@@ -113,6 +113,7 @@ class UiAgentBase(object):
                        self.iq, self.isq, message_processor 
                        )
         if quit:
+            print "* UI: ending"
             self.on_destroy()
             
         ## for gobject... just in case

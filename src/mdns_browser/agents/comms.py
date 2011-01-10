@@ -35,6 +35,7 @@ class CommsAgent(AgentThreadedBase):
             ##The following doesn't work on Linux
             try:    self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
             except: pass
+            a
         except:
             self._failures.append("Socket Options: REUSEADDR")
         
@@ -64,6 +65,11 @@ class CommsAgent(AgentThreadedBase):
         
         
     def h___tick__(self, *_):
+        """ Might have to tweak receive interval...
+        """
+        if len(self._failures) > 0:
+            self.log("c", "Network Socket Error: %s" % self._failures)
+        
         try:
             rr, _wr, _er = select.select([self.socket,], [], [], _SELECT_TIMEOUT)
             if rr:

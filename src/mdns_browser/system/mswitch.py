@@ -74,10 +74,6 @@ class CentralSwitch(Thread):
                     envelope=self.isq.get(block=False)
                     orig, mtype, payload=envelope
                     
-                    if mtype=="__halt__":
-                        self.halting=True
-                        continue
-                    
                     if mtype=="__interest__":
                         self.do_interest(payload)
                         continue
@@ -88,13 +84,18 @@ class CentralSwitch(Thread):
                     ## committing "hara-kiri"
                     if mtype=="__quit__":
                         quit=True
+                        break
 
+                    if mtype=="__halt__":
+                        self.halting=True
+                        continue
+                    
                 except Empty:
                     break
     
             burst=self.LOW_PRIORITY_BURST_SIZE
             
-            while True and not self.halting:
+            while not self.halting and not quit:
                 try:            
                     ## normal priority queue            
                     envelope=self.iq.get(block=True, timeout=0.1)
@@ -116,7 +117,7 @@ class CentralSwitch(Thread):
                 except Empty:
                     break
         
-        #print "mswitch - shutdown"
+        print "* mswitch: ending"
         
     def do_interest(self, args):
         """
