@@ -9,7 +9,7 @@ Multi-threaded, agent based, message switch
 
 *	Timer     : maintains the time-base
 *	Querier   : performs periodic query
-*	Listener  : listens to incoming mDNS answers
+*	Listener  : listens to incoming mDNS answers, issues "service" and "answer" messages
 *	Comms     : performs In/Out socket communications
 *	Cache     : maintains a cache of services
 *	Presenter : presents the GUI
