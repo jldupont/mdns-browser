@@ -30,10 +30,14 @@ class LoggerAgent(AgentThreadedBase):
             self.pub("logcredits", {"w": 2, "e": 2, "i": 20})
 
     def h___log__(self, logLevel, msg, *pargs):
-        self.h_log(logLevel, msg, *pargs)
+        if logLevel != "d":
+            self.h_log(logLevel, msg, *pargs)
         
     def h_log(self, logLevel, msg, *pargs):
-        tag=self.MAP.get(logLevel, "INFO")
+        if logLevel=="d":
+            return
+        
+        tag=self.MAP.get(logLevel, "????")
         try:
             str = msg % pargs
             print "%s: %s" % (tag, str)

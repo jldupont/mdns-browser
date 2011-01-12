@@ -23,6 +23,7 @@ class ListenerAgent(AgentThreadedBase):
     
     def __init__(self):
         AgentThreadedBase.__init__(self)
+        self.logged={}
 
     def h_packet(self, packet_data, addr, port):
         try:
@@ -35,13 +36,18 @@ class ListenerAgent(AgentThreadedBase):
     def _handleMsg(self, msg):
         for answer in msg.answers:
             if type(answer) is DNSService:
-                self.log("i", "service: name: %s, port: %s, server: %s, weight: %s, priority: %s" % (answer.name, answer.port, answer.server, answer.weight, answer.priority))
+                if self.logged.get(answer.name, None)!=answer.server:
+                    self.log("i", "service: name: %s, port: %s, server: %s, weight: %s, priority: %s" % (answer.name, answer.port, answer.server, answer.weight, answer.priority))
+                    self.logged[answer.name]=answer.server
                 self.pub("raw_service", answer.name, answer.server, answer.port)
+                
             if type(answer) is DNSAddress:
                 address_type="ipv4" if answer.type==1 else "ipv6"
                 try:     address= socket.inet_ntoa(answer.address)
                 except:  address=answer.address
-                self.log("i", "address: name: %s, %s, %s, %s" % (str(answer.name), address_type, address, answer.ttl))
+                if self.logged.get((answer.name, address_type), None)!=address:
+                    self.log("i", "address: name: %s, %s, %s, %s" % (str(answer.name), address_type, address, answer.ttl))
+                    self.logged[(answer.name, address_type)]=address
                 self.pub("raw_address", str(answer.name), address_type, address)
             
 

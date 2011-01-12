@@ -175,6 +175,7 @@ class AgentThreadedBase(Thread):
     LOW_PRIORITY_BURST_SIZE=5
     
     HP_LOGGING = ["c", "e"]
+    LOG_CREDITS={"d": 1, "i":10, "w": 2, "e": 2, "c":1}
     
     def __init__(self, debug=False):
         Thread.__init__(self)
@@ -243,7 +244,8 @@ class AgentThreadedBase(Thread):
             self._pub("log", logLevel, *pargs)
             
         if logLevel != "d" and logLevel != "D":
-            self.credits[logLevel]=self.credits.get(logLevel, 1)-1
+            start_credits=self.LOG_CREDITS.get(logLevel, 1)
+            self.credits[logLevel]=self.credits.get(logLevel, start_credits)-1
         
     def beforeRun(self):
         pass

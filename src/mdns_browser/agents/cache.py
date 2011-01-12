@@ -4,7 +4,7 @@
     MESSAGES IN:
     - "raw_service"
     - "raw_address"
-    - "entries?"
+    - "services?"
     
     MESSAGES OUT:
     - "service"
@@ -35,7 +35,7 @@ class CacheAgent(AgentThreadedBase):
             self._processExpired()
             
         if second_marker and self.newEntry:
-            self._announceEntries()
+            self._announceServices()
     
     def h_raw_service(self, service_name, server_name, server_port):
         self.services[service_name] = {"server_name": server_name,
@@ -84,10 +84,10 @@ class CacheAgent(AgentThreadedBase):
             del self.addresses[server_name]
 
     
-    def hq_entries(self):
-        self._announceEntries()
+    def hq_services(self):
+        self._announceEntries(True)
     
-    def _announceEntries(self):
+    def _announceServices(self, force=False):
         """ Announce all entries
         """
         self.newEntry=False
@@ -96,7 +96,7 @@ class CacheAgent(AgentThreadedBase):
             server_port=entry["server_port"]
             addresses=self.addresses.get(server_name, None)
             if addresses is not None:
-                if service_name not in self.justAnnounced:
+                if service_name not in self.justAnnounced or force:
                     self.pub("service", service_name, server_name, server_port, addresses)
                     self.justAnnounced.append(service_name)
         
