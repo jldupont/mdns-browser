@@ -16,11 +16,12 @@ gobject.threads_init()  #@UndefinedVariable
 
 from mdns_browser.system import mswitch
 from mdns_browser.agents import sup
-#from mdns_browser.agents import debug
+from mdns_browser.agents import debug
 from mdns_browser.agents import comms
 from mdns_browser.agents import logger
 from mdns_browser.agents import querier
 from mdns_browser.agents import listener
+from mdns_browser.agents import cache
 from mdns_browser.system.ui_base import UiAgentBase
 
 

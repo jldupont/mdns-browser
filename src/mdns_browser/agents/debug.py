@@ -14,6 +14,8 @@ class DebugAgent(AgentThreadedBase):
     def h_packet(self, data, addr, port):
         print "* packet: (%s, %s)" % (addr, port)
 
+    def h_service(self, *pargs):
+        print "DEBUG -- SERVICE: %s, %s, %s, %s" % pargs 
 
 _=DebugAgent()
 _.start()

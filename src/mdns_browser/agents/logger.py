@@ -27,7 +27,7 @@ class LoggerAgent(AgentThreadedBase):
         Timebase used to replenish credits: 1 min
         """
         if min_marker:
-            self.pub("logcredits", {"w": 1, "e": 1, "i": 1})
+            self.pub("logcredits", {"w": 2, "e": 2, "i": 20})
 
     def h___log__(self, logLevel, msg, *pargs):
         self.h_log(logLevel, msg, *pargs)
