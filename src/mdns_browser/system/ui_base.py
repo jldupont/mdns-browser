@@ -18,7 +18,7 @@ class UiAgentBase(object):
     REFRESH_TIMEOUT=10
     LOW_PRIORITY_MESSAGE_BURST_SIZE=5
     
-    def __init__(self, time_base):
+    def __init__(self, time_base, ui_window_class, glade_file_path):
         """
         @param time_base: in milliseconds
         @param glade_file: absolute file path to the ui glade XML file
@@ -26,6 +26,8 @@ class UiAgentBase(object):
         """
         self.time_base=time_base 
         self.ticks_second=1000/time_base
+        self.ui_window_class=ui_window_class
+        self.glade_file_path=glade_file_path
 
         self.iq=Queue()
         self.isq=Queue()
@@ -47,7 +49,7 @@ class UiAgentBase(object):
         """ We should show the main application window
         """
         if self.window is None:
-            self.window=self.ui_window_class(self.glade_file)
+            self.window=self.ui_window_class(self.glade_file_path)
             self.do_updates()
             
     def h_app_close(self, *_):
@@ -59,6 +61,7 @@ class UiAgentBase(object):
         self.on_destroy()
 
     def on_destroy(self):
+        print "ui_base.on_destroy"
         gtk.main_quit()
         
     def do_updates(self):

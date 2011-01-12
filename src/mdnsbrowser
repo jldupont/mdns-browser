@@ -9,6 +9,8 @@ import sys
 cp=os.path.abspath(os.path.dirname(__file__))
 sys.path.insert(0, cp)
 
+GLADE_FILE_PATH=os.path.join(cp, "ui.glade")
+
 import gobject  
 import gtk
 
@@ -22,7 +24,7 @@ from mdns_browser.agents import logger
 from mdns_browser.agents import querier
 from mdns_browser.agents import listener
 from mdns_browser.agents import cache
-from mdns_browser.system.ui_base import UiAgentBase
+from mdns_browser.agents.ui import UiAgent
 
 
 def main():
@@ -30,7 +32,7 @@ def main():
         from mdns_browser.agents.tray import TrayAgent
         _ta=TrayAgent(APP_NAME, "")
 
-        _ua=UiAgentBase(TIME_BASE)
+        _ua=UiAgent(TIME_BASE,GLADE_FILE_PATH)
         gobject.timeout_add(TIME_BASE, _ua.tick)
 
         gtk.main()

@@ -6,8 +6,7 @@
 """
 __all__=["TrayAgent"]
 
-import os
-import gtk #@UnusedImport
+import gtk
 import gtk.gdk
 import webbrowser
 import mdns_browser.system.mswitch as mswitch
