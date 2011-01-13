@@ -61,7 +61,7 @@ class UiAgentBase(object):
         self.on_destroy()
 
     def on_destroy(self):
-        print "ui_base.on_destroy"
+        #print "ui_base.on_destroy"
         gtk.main_quit()
         
     def do_updates(self):
@@ -75,6 +75,14 @@ class UiAgentBase(object):
         This can be subclassed - it will be called every REFRESH_TIMEOUT seconds
         """
 
+    def pub(self, msgType, *pargs, **kargs):
+        mswitch.publish("__main__", msgType, *pargs, **kargs)
+        
+    def log(self, logLevel, *pargs):
+        """ Logging Facility
+        """
+        self.pub("__log__", logLevel, *pargs)
+                
     def tick(self, *_):
         """
         Performs message dispatch

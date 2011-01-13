@@ -85,7 +85,7 @@ class CacheAgent(AgentThreadedBase):
 
     
     def hq_services(self):
-        self._announceEntries(True)
+        self._announceServices(True)
     
     def _announceServices(self, force=False):
         """ Announce all entries
@@ -97,6 +97,7 @@ class CacheAgent(AgentThreadedBase):
             addresses=self.addresses.get(server_name, None)
             if addresses is not None:
                 if service_name not in self.justAnnounced or force:
+                    print "announcing (%s): %s" % (force, service_name)
                     self.pub("service", service_name, server_name, server_port, addresses)
                     self.justAnnounced.append(service_name)
         
