@@ -7,8 +7,8 @@
     - "services?"
     
     MESSAGES OUT:
-    - "service"
-    - "service_expired"
+    - "service"         (service_name, server_name, server_port, addresses)
+    - "service_expired" (service_name, server_name, server_port)
 
         
     Created on 2011-01-07
@@ -68,8 +68,11 @@ class CacheAgent(AgentThreadedBase):
                 self.services[service_name].update({"ttl": ttl})
         for service_name in to_delete:
             ##print "!! deleting: %s" % service_name
+            entry = self.services[service_name]
+            server_name=entry["server_name"]
+            server_port=entry["server_port"]
+            self.pub("service_expired", service_name, server_name, server_port)
             del self.services[service_name]
-            self.pub("service_expired", service_name) ##---------------------- MSG
         
         to_delete=[]
         for server_name, entry in self.addresses.iteritems():
@@ -97,7 +100,7 @@ class CacheAgent(AgentThreadedBase):
             addresses=self.addresses.get(server_name, None)
             if addresses is not None:
                 if service_name not in self.justAnnounced or force:
-                    print "announcing (%s): %s" % (force, service_name)
+                    #print "announcing (%s): %s" % (force, service_name)
                     self.pub("service", service_name, server_name, server_port, addresses)
                     self.justAnnounced.append(service_name)
         
