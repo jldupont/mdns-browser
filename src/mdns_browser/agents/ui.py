@@ -64,11 +64,11 @@ class UiWindow(object): #@UndefinedVariable
             sn, sern, _a, _sp = row
             if service_name==sn and server_name==sern:
                 return
-        print "!! Ui Window: adding service: %s" % service_name 
+        #print "!! Ui Window: adding service: %s" % service_name 
         self.list_services.append([service_name, server_name, addresses["ipv4"], server_port])
         
     def remove_service(self, service_name, server_name, server_port):
-        print "!! Ui Window: removing: %s " % service_name
+        #print "!! Ui Window: removing: %s " % service_name
         for row in self.list_services:
             sn, sern, _a, _sp = row
             if service_name==sn and sern==server_name:
@@ -76,7 +76,7 @@ class UiWindow(object): #@UndefinedVariable
 
     def row_activated(self, tv, path, *_):
         entry=self.list_services[path]
-        service_name, server_name, address, port=entry
+        _service_name, _server_name, address, port=entry
         #print ">> selected: %s" % service_name
         url="http://%s:%s/" % (address, port)
         webbrowser.open(url, new=0, autoraise=True)
@@ -84,8 +84,8 @@ class UiWindow(object): #@UndefinedVariable
 
 
 class UiAgent(UiAgentBase):
-    def __init__(self, time_base, glade_file_path):
-        UiAgentBase.__init__(self, time_base, UiWindow, glade_file_path)
+    def __init__(self, time_base):
+        UiAgentBase.__init__(self, time_base, UiWindow)
         
     def do_updates(self):
         if self.window is not None:

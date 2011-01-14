@@ -18,7 +18,7 @@ class UiAgentBase(object):
     REFRESH_TIMEOUT=10
     LOW_PRIORITY_MESSAGE_BURST_SIZE=5
     
-    def __init__(self, time_base, ui_window_class, glade_file_path):
+    def __init__(self, time_base, ui_window_class=None, glade_file_path=None):
         """
         @param time_base: in milliseconds
         @param glade_file: absolute file path to the ui glade XML file
@@ -49,8 +49,9 @@ class UiAgentBase(object):
         """ We should show the main application window
         """
         if self.window is None:
-            self.window=self.ui_window_class(self.glade_file_path)
-            self.do_updates()
+            if self.ui_window_class is not None:
+                self.window=self.ui_window_class(self.glade_file_path)
+                self.do_updates()
             
     def h_app_close(self, *_):
         """ Seems that the application window was closed...
