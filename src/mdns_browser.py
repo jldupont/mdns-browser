@@ -7,6 +7,7 @@
 """
 
 APP_NAME="mdns_browser"
+HELP_URL="http://www.data-tester.com/support"
 TIME_BASE=1000
 
 import os
@@ -35,7 +36,7 @@ from mdns_browser.agents.ui import UiAgent
 def main():
     try:
         from mdns_browser.agents.tray import TrayAgent
-        _ta=TrayAgent(APP_NAME, "")
+        _ta=TrayAgent(APP_NAME, HELP_URL)
 
         _ua=UiAgent(TIME_BASE)
         gobject.timeout_add(TIME_BASE, _ua.tick)

@@ -44,6 +44,8 @@ class UiAgentBase(object):
         self.interests={}
         self.responsesInterests=[]
         
+        self.h_app_show()
+        
         
     def h_app_show(self, *_):
         """ We should show the main application window

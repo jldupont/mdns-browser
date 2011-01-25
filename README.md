@@ -7,7 +7,7 @@ Makefile
 
 " make wzip " : builds the Windows distribution zip file
 
-" make install_linux" : install in ~/mdns_browser
+" make install_linux [dir=INSTALL_DIR]" : install in ~/mdns_browser or INSTALL_DIR
 
 
 Architecture

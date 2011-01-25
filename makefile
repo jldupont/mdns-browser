@@ -1,3 +1,8 @@
+# @author: Jean-Lou Dupont
+#
+# @version: 1
+#
+
 PRJ=mdns_browser
 
 DEFAULT_DIR=~/${PRJ}
@@ -14,6 +19,9 @@ all:
 
 wzip:
 	@echo "Building Windows distribution zip file"
+	@echo "** The utility '7-zip' is required"
+	cd src && python setup_exe.py py2exe
+	7z a -tzip mdns_browser-win32 ./src/dist/*.*
 	
 install_linux:
 	@echo "Installing in ${INSTALL_DIR}"
