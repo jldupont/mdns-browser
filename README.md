@@ -1,9 +1,19 @@
 Cross-platform Multicast-DNS Service Browser
+============================================
 
-Tested on Windows XP and Linux Ubuntu.
+This application discovers the HTTP services announced on the local LAN segment 
+using Multicast-DNS / Service-Discovery as per "draft-cheshire-dnsext-multicastdns-12.txt" & "draft-cheshire-dnsext-dns-sd-07.txt".
+
+The application can be useful in a context such as discovery network equipment as per [LXI Standard](http://www.lxistandard.org/).
+
+History
+-------
+
+0.1: initial release
+0.2: added 'app_version' attribute to window title
 
 Makefile
-========
+--------
 
 " make wzip " : builds the Windows distribution zip file
 
@@ -13,7 +23,7 @@ Building the Windows distribution requires a full install of 'pygtk' version 2.x
 A zip file of the "mdns_browser-win32.zip" will be created in the current directory.
 
 Usage Note
-==========
+----------
 
 On Linux, pygtk 2.x must be installed.
 
@@ -24,11 +34,11 @@ On Windows using from source:
 
 On Windows using zip distribution:
   unzip in any directory e.g. c:\Program Files\mdns_browser
-  mdns_browser.exe
+  execute "mdns_browser.exe"
 
 
 Architecture
-============
+------------
 
 Multi-threaded, agent based, message switch
 

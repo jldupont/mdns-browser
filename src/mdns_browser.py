@@ -12,7 +12,7 @@
 """
 APP_VERSION = "0.2"
 APP_NAME="mdns_browser"
-HELP_URL="http://www.data-tester.com/support"
+HELP_URL="https://github.com/jldupont/mdns-browser"
 TIME_BASE=1000
 
 import os
