@@ -4,8 +4,13 @@
     Created on 2011-01-13
 
     @author: jldupont
+    
+    History:
+    0.1: initial release
+    0.2: added version # to window title
+    
 """
-
+APP_VERSION = "0.2"
 APP_NAME="mdns_browser"
 HELP_URL="http://www.data-tester.com/support"
 TIME_BASE=1000
@@ -38,7 +43,7 @@ def main():
         from mdns_browser.agents.tray import TrayAgent
         _ta=TrayAgent(APP_NAME, HELP_URL)
 
-        _ua=UiAgent(TIME_BASE)
+        _ua=UiAgent(TIME_BASE, app_version=APP_VERSION)
         gobject.timeout_add(TIME_BASE, _ua.tick)
 
         gtk.main()

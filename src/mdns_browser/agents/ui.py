@@ -16,10 +16,13 @@ class UiWindow(object): #@UndefinedVariable
         Service Name ,  Server Name , Server Address , Server Port
     
     """
-    def __init__(self, glade_file):
+    def __init__(self, glade_file, app_version=None):
 
         self.window = gtk.Window()
-        self.window.set_title("MDNS Browser")
+        if app_version is not None:
+            self.window.set_title("MDNS Browser - version %s" % app_version)
+        else:
+            self.window.set_title("MDNS Browser")
 
         self.list_services=gtk.ListStore(str, str, str, str)
         self.treeview = gtk.TreeView(self.list_services)
@@ -84,8 +87,8 @@ class UiWindow(object): #@UndefinedVariable
 
 
 class UiAgent(UiAgentBase):
-    def __init__(self, time_base):
-        UiAgentBase.__init__(self, time_base, UiWindow)
+    def __init__(self, time_base, app_version=None):
+        UiAgentBase.__init__(self, time_base, ui_window_class=UiWindow, app_version=app_version)
         
     def do_updates(self):
         if self.window is not None:
