@@ -48,8 +48,7 @@ The configuration file "config" must be located in the same folder as the execut
 # filter-out based on the following prefixes.
 # all entries matching the prefix will be filtered-out
 [service]
-  filters: prefix1, prefix2 ...
-`
+  filters: prefix1, prefix2 ...`
 
 Architecture
 ------------
