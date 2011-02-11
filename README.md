@@ -42,7 +42,7 @@ Configuration File
 
 The configuration file "config" must be located in the same folder as the executable. The format is the following:
 
-` # location of the help page
+`# location of the help page
 [help]
   url: http://some-website.com/
 # filter-out based on the following prefixes.
