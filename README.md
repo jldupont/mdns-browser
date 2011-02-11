@@ -37,6 +37,10 @@ On Windows using zip distribution:
   execute "mdns_browser.exe"
 
 
+Configuration File
+------------------
+
+
 Architecture
 ------------
 
