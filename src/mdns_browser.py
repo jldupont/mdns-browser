@@ -8,9 +8,10 @@
     History:
     0.1: initial release
     0.2: added version # to window title
+    0.3: added (optional) config file
     
 """
-APP_VERSION = "0.2"
+APP_VERSION = "0.3"
 APP_NAME="mdns_browser"
 HELP_URL="https://github.com/jldupont/mdns-browser"
 TIME_BASE=1000
