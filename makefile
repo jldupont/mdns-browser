@@ -20,8 +20,11 @@ all:
 wzip:
 	@echo "Building Windows distribution zip file"
 	@echo "** The utility '7-zip' is required"
+	del /Q mdns_browser-win32.zip
+	del /Q /S .\src\dist
+	del /Q /S .\src\build
 	cd src && python setup_exe.py py2exe
-	7z a -tzip mdns_browser-win32 ./src/dist/*.*
+	7z a -tzip mdns_browser-win32 ./src/dist/*
 	
 install_linux:
 	@echo "Installing in ${INSTALL_DIR}"

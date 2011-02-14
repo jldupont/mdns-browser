@@ -12,14 +12,18 @@ setup(
     name = 'mdns_browser',
 
     windows = [
-                      {
-                          'script': 'mdns_browser.py',
-                      }
-                  ],
-    options = {
+                {
+                 'script': 'mdns_browser.py',
+                }
+            ]
+    ,data_files=['config', ]
+    #,include_package_data=True
+    #,package_data = { '':[ "config", ], }    
+    ,options = {
                   'py2exe': {
-                      'packages':'encodings',
-                      'includes': 'cairo, pango, pangocairo, atk, gobject, glib, gio',
+                      'packages':'encodings'
+                      ,'includes': 'cairo, pango, pangocairo, atk, gobject, glib, gio'
+                      #,"bundle_files": 1
                   }
               },
 )
