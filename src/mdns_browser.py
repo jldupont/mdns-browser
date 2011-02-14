@@ -48,15 +48,16 @@ def main():
         help_url=cfg.get("help", "url", HELP_URL)
         _ta=TrayAgent(APP_NAME, help_url)
 
-        server_name_column_visibility=cfg.get("column", "server_name", "yes")
-        server_port_column_visibility=cfg.get("column", "server_port", "yes")
-        server_address_column_visibility=cfg.get("column", "server_port", "yes")
-
+        filters=cfg.get("service", "filters", "")
+        try:     filterList=filters.split(",")
+        except:  filterList=[]
+            
         opts={
               "app_version": APP_VERSION
-              ,"server_name_column_visibility":server_name_column_visibility
-              ,"server_port_column_visibility": server_port_column_visibility
-              ,"server_address_column_visibility":server_address_column_visibility
+              ,"server_name_column_visibility":cfg.get("column", "server_name", "yes")=="yes"
+              ,"server_port_column_visibility": cfg.get("column", "server_port", "yes")=="yes"
+              ,"server_address_column_visibility":cfg.get("column", "server_port", "yes")=="yes"
+              ,"service_filters": filterList
               }
 
         _ua=UiAgent(TIME_BASE, opts)

@@ -31,21 +31,21 @@ class UiWindow(object): #@UndefinedVariable
         col.set_attributes(cell,text=0)
         self.treeview.append_column(col)
 
-        snv=opts["server_name_column_visibility"]=="yes"
+        snv=opts["server_name_column_visibility"]
         col = gtk.TreeViewColumn("Server Name")
         col.pack_start(cell, True)
         col.set_attributes(cell,text=1)
         col.set_visible(snv)
         self.treeview.append_column(col)
 
-        sav=opts["server_address_column_visibility"]=="yes"
+        sav=opts["server_address_column_visibility"]
         col = gtk.TreeViewColumn("Server Address")
         col.pack_start(cell, True)
         col.set_attributes(cell,text=2)
         col.set_visible(sav)
         self.treeview.append_column(col)
 
-        spv=opts["server_port_column_visibility"]=="yes"
+        spv=opts["server_port_column_visibility"]
         col = gtk.TreeViewColumn("Server Port")
         col.pack_start(cell, True)
         col.set_attributes(cell,text=3)

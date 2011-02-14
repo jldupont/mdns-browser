@@ -3,6 +3,7 @@
 url: https://github.com/jldupont/mdns-browser
 
 ## column visibility
+##  "yes" | "no"
 [column]
 server_name: no
 server_port: yes
@@ -12,3 +13,4 @@ server_address: yes
 # all entries matching the prefix will be filtered-out
 [service]
 filters: DT_, Data-Tester_
+
