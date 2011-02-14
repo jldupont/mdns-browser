@@ -50,6 +50,12 @@ The configuration file "config" must be located in the same folder as the execut
 	[service]
   		filters: prefix1, prefix2 ...`
 
+Testing with Avahi
+------------------
+
+	avahi-publish -s testService _http._tcp 9000
+
+
 Architecture
 ------------
 

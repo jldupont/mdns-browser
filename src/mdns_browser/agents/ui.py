@@ -18,6 +18,8 @@ class UiWindow(object): #@UndefinedVariable
     """
     def __init__(self, opts):
 
+        self.opts=opts
+        
         self.window = gtk.Window()
         self.window.set_title("MDNS Browser - version %s" % opts["app_version"])
 
@@ -71,7 +73,8 @@ class UiWindow(object): #@UndefinedVariable
             if service_name==sn and server_name==sern:
                 return
         #print "!! Ui Window: adding service: %s" % service_name 
-        self.list_services.append([service_name, server_name, addresses["ipv4"], server_port])
+        if self._filtered(service_name):
+            self.list_services.append([service_name, server_name, addresses["ipv4"], server_port])
         
     def remove_service(self, service_name, server_name, server_port):
         #print "!! Ui Window: removing: %s " % service_name
@@ -87,6 +90,14 @@ class UiWindow(object): #@UndefinedVariable
         url="http://%s:%s/" % (address, port)
         webbrowser.open(url, new=0, autoraise=True)
 
+    def _filtered(self, service_name):
+        filters=self.opts["service_filters"]
+        if len(filters)==0:
+            return True
+        for filter in filters:
+            if service_name.startswith(filter):
+                return True
+        return False
 
 
 class UiAgent(UiAgentBase):

@@ -9,8 +9,9 @@ server_name: no
 server_port: yes
 server_address: yes
 
-# filter-out based on the following prefixes.
-# all entries matching the prefix will be filtered-out
+# filter-in based on the following prefixes.
+#   all entries matching the prefix will be "filtered-in"
+#   if no entries are specified, then all services will be "filtered-in"
 [service]
 filters: DT_, Data-Tester_
 
