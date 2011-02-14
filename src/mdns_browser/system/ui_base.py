@@ -18,17 +18,18 @@ class UiAgentBase(object):
     REFRESH_TIMEOUT=10
     LOW_PRIORITY_MESSAGE_BURST_SIZE=5
     
-    def __init__(self, time_base, ui_window_class=None, glade_file_path=None, app_version=None):
+    def __init__(self, time_base, ui_window_class=None, opts={}):
         """
         @param time_base: in milliseconds
         @param glade_file: absolute file path to the ui glade XML file
         @param ui_window_class: class object for the ui window 
         """
-        self.app_version=app_version
+        self.opts=opts
+        self.app_version=opts["app_version"]
         self.time_base=time_base 
         self.ticks_second=1000/time_base
         self.ui_window_class=ui_window_class
-        self.glade_file_path=glade_file_path
+        self.glade_file_path=opts.get("glade_file_path", None)
 
         self.iq=Queue()
         self.isq=Queue()
@@ -53,7 +54,7 @@ class UiAgentBase(object):
         """
         if self.window is None:
             if self.ui_window_class is not None:
-                self.window=self.ui_window_class(self.glade_file_path, app_version=self.app_version)
+                self.window=self.ui_window_class(self.opts)
                 self.do_updates()
             
     def h_app_close(self, *_):

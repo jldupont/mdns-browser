@@ -1,0 +1,8 @@
+# location of the help page
+[help]
+url: http://some-website.com/
+
+# filter-out based on the following prefixes.
+# all entries matching the prefix will be filtered-out
+[service]
+filters: DT_, Data-Tester_

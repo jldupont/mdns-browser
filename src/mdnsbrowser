@@ -1,7 +1,9 @@
 #!/usr/bin/env python
+## NOT USED!!!
 
 APP_NAME="mdns_browser"
 TIME_BASE=1000
+
 
 import os
 import sys
@@ -9,7 +11,11 @@ import sys
 cp=os.path.abspath(os.path.dirname(__file__))
 sys.path.insert(0, cp)
 
-GLADE_FILE_PATH=os.path.join(cp, "ui.glade")
+## "config" file
+import ConfigParser
+Config = ConfigParser.ConfigParser()
+cfg=Config.read(os.path.join(cp, "config"))
+
 
 import gobject  
 import gtk
@@ -32,7 +38,7 @@ def main():
         from mdns_browser.agents.tray import TrayAgent
         _ta=TrayAgent(APP_NAME, "")
 
-        _ua=UiAgent(TIME_BASE,GLADE_FILE_PATH)
+        _ua=UiAgent(TIME_BASE, None)
         gobject.timeout_add(TIME_BASE, _ua.tick)
 
         gtk.main()

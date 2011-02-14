@@ -16,13 +16,10 @@ class UiWindow(object): #@UndefinedVariable
         Service Name ,  Server Name , Server Address , Server Port
     
     """
-    def __init__(self, glade_file, app_version=None):
+    def __init__(self, opts):
 
         self.window = gtk.Window()
-        if app_version is not None:
-            self.window.set_title("MDNS Browser - version %s" % app_version)
-        else:
-            self.window.set_title("MDNS Browser")
+        self.window.set_title("MDNS Browser - version %s" % opts["app_version"])
 
         self.list_services=gtk.ListStore(str, str, str, str)
         self.treeview = gtk.TreeView(self.list_services)
@@ -34,19 +31,25 @@ class UiWindow(object): #@UndefinedVariable
         col.set_attributes(cell,text=0)
         self.treeview.append_column(col)
 
+        snv=opts["server_name_column_visibility"]=="yes"
         col = gtk.TreeViewColumn("Server Name")
         col.pack_start(cell, True)
         col.set_attributes(cell,text=1)
+        col.set_visible(snv)
         self.treeview.append_column(col)
 
+        sav=opts["server_address_column_visibility"]=="yes"
         col = gtk.TreeViewColumn("Server Address")
         col.pack_start(cell, True)
         col.set_attributes(cell,text=2)
+        col.set_visible(sav)
         self.treeview.append_column(col)
 
+        spv=opts["server_port_column_visibility"]=="yes"
         col = gtk.TreeViewColumn("Server Port")
         col.pack_start(cell, True)
         col.set_attributes(cell,text=3)
+        col.set_visible(spv)
         self.treeview.append_column(col)
 
         self.treeview.connect("row-activated", self.row_activated)
@@ -87,8 +90,8 @@ class UiWindow(object): #@UndefinedVariable
 
 
 class UiAgent(UiAgentBase):
-    def __init__(self, time_base, app_version=None):
-        UiAgentBase.__init__(self, time_base, ui_window_class=UiWindow, app_version=app_version)
+    def __init__(self, time_base, opts={}):
+        UiAgentBase.__init__(self, time_base, ui_window_class=UiWindow, opts=opts)
         
     def do_updates(self):
         if self.window is not None:

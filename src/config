@@ -1,0 +1,14 @@
+# location of the help page
+[help]
+url: https://github.com/jldupont/mdns-browser
+
+## column visibility
+[column]
+server_name: no
+server_port: yes
+server_address: yes
+
+# filter-out based on the following prefixes.
+# all entries matching the prefix will be filtered-out
+[service]
+filters: DT_, Data-Tester_

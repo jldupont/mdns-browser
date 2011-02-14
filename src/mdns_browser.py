@@ -22,6 +22,10 @@ import sys
 cp=os.path.abspath(os.path.dirname(sys.argv[0])) 
 sys.path.insert(0, cp)
 
+## "config" file
+from mdns_browser.system.config import Configuration
+cfg = Configuration(os.path.join(cp, "config"))
+                    
 import gobject  
 import gtk
 
@@ -41,9 +45,21 @@ from mdns_browser.agents.ui import UiAgent
 def main():
     try:
         from mdns_browser.agents.tray import TrayAgent
-        _ta=TrayAgent(APP_NAME, HELP_URL)
+        help_url=cfg.get("help", "url", HELP_URL)
+        _ta=TrayAgent(APP_NAME, help_url)
 
-        _ua=UiAgent(TIME_BASE, app_version=APP_VERSION)
+        server_name_column_visibility=cfg.get("column", "server_name", "yes")
+        server_port_column_visibility=cfg.get("column", "server_port", "yes")
+        server_address_column_visibility=cfg.get("column", "server_port", "yes")
+
+        opts={
+              "app_version": APP_VERSION
+              ,"server_name_column_visibility":server_name_column_visibility
+              ,"server_port_column_visibility": server_port_column_visibility
+              ,"server_address_column_visibility":server_address_column_visibility
+              }
+
+        _ua=UiAgent(TIME_BASE, opts)
         gobject.timeout_add(TIME_BASE, _ua.tick)
 
         gtk.main()
