@@ -5,7 +5,7 @@
 
     @author: jldupont
 '''
-__version__="0.3"
+__version__="0.4"
 from distutils.core import setup
 import py2exe
 
