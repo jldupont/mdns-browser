@@ -95,7 +95,8 @@ class UiWindow(object): #@UndefinedVariable
         if len(filters)==0:
             return True
         for filter in filters:
-            if service_name.startswith(filter):
+            #print "* trying filter: "+filter
+            if service_name.startswith(filter.strip()):
                 return True
         return False
 

@@ -5,12 +5,13 @@
 
     @author: jldupont
 '''
+__version__="0.3"
 from distutils.core import setup
 import py2exe
 
 setup(
     name = 'mdns_browser',
-
+    version=      __version__,
     windows = [
                 {
                  'script': 'mdns_browser.py',

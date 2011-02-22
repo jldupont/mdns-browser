@@ -11,6 +11,7 @@ History
 
 0.1: initial release
 0.2: added 'app_version' attribute to window title
+0.3: made the 'config' parsing more lenient
 
 Makefile
 --------
