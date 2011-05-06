@@ -5,7 +5,7 @@ branch_name="(unnamed branch)"     # detached HEAD
 
 branch_name=${branch_name##refs/heads/}
 
-echo "Comment: " $1
+echo "Branch(${branch_name}) Comment: " $1
 
 GIT=`which git`
 
