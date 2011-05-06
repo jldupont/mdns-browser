@@ -1,9 +1,14 @@
 #!/bin/bash
 
+branch_name="$(git symbolic-ref HEAD 2>/dev/null)" ||
+branch_name="(unnamed branch)"     # detached HEAD
+
+branch_name=${branch_name##refs/heads/}
+
 echo "Comment: " $1
 
 GIT=`which git`
 
 $GIT add .
 $GIT commit -m "$1"
-$GIT push origin master
+$GIT push origin ${branch_name}
