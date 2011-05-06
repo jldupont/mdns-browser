@@ -27,8 +27,8 @@ sys.path.insert(0, cp)
 from mdns_browser.system.config import Configuration
 cfg = Configuration(os.path.join(cp, "config"))
                     
-#import gobject  
-#import gtk
+import gobject  
+import gtk
 
 gobject.threads_init()  #@UndefinedVariable
 
