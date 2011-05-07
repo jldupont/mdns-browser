@@ -253,6 +253,14 @@ class AgentThreadedBase(Thread):
     def doQuit(self):
         self.quit=True
         
+    def runloop(self):
+        """
+        One loop iteration
+        """
+        return process_queues(self.halting, self, self.agent_name, self.id, 
+                                self.mmap, self.responsesInterest,
+                                self.iq, self.isq, message_processor)
+        
     def run(self):
         """
         Main Loop
@@ -270,9 +278,7 @@ class AgentThreadedBase(Thread):
         
         quit=False
         while not self.quit and not quit:
-            quit=process_queues(self.halting, self, self.agent_name, self.id, 
-                                self.mmap, self.responsesInterest,
-                                self.iq, self.isq, message_processor)
+            quit=self.runloop()
         
         ##self._pub("__agent__", self.agent_name, self.id, "stop")    
         print "Agent(%s) (%s) ending" % (self.agent_name, self.id)

@@ -30,7 +30,7 @@ cfg = Configuration(os.path.join(cp, "config"))
 #import gobject  
 #import gtk
 
-gobject.threads_init()  #@UndefinedVariable
+#gobject.threads_init()  #@UndefinedVariable
 
 from mdns_browser.system import mswitch
 from mdns_browser.agents import sup
