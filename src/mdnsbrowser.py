@@ -40,14 +40,15 @@ from mdns_browser.agents import logger
 from mdns_browser.agents import querier
 from mdns_browser.agents import listener
 from mdns_browser.agents import cache
-from mdns_browser.agents.ui import UiAgent
+#from mdns_browser.agents.ui import UiAgent
+from mdns_browser.agents.uitk import UiWindow
 
 
 def main():
     try:
-        from mdns_browser.agents.tray import TrayAgent
-        help_url=cfg.get("help", "url", HELP_URL)
-        _ta=TrayAgent(APP_NAME, help_url)
+        #from mdns_browser.agents.tray import TrayAgent
+        #help_url=cfg.get("help", "url", HELP_URL)
+        #_ta=TrayAgent(APP_NAME, help_url)
 
         filters=cfg.get("service", "filters", "")
         try:     filterList=filters.split(",")
@@ -61,10 +62,8 @@ def main():
               ,"service_filters": filterList
               }
 
-        _ua=UiAgent(TIME_BASE, opts)
-        gobject.timeout_add(TIME_BASE, _ua.tick)
-
-        gtk.main()
+        uiw=UiWindow(opts)
+        uiw.mainloop()
         
     except Exception,e:
         print "** Exception: %s" % e

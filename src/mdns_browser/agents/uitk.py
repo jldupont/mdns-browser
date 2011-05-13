@@ -7,17 +7,20 @@ from Tkinter import *
 import webbrowser
 
 import mdns_browser.system.mswitch as mswitch
-from mdns_browser.system.ui_base import Agent
+from mdns_browser.system.base import Agent
 
+
+TIME_BASE=250
 
 class UiWindow(Frame): #@UndefinedVariable
     """
         Service Name ,  Server Name , Server Address , Server Port
     
     """
-    def __init__(self):
+    def __init__(self, opts):
         Frame.__init__(self, None)
-        
+
+        self.opts=opts
         self.ag=Agent(self)
         
         self.grid()
@@ -33,15 +36,22 @@ class UiWindow(Frame): #@UndefinedVariable
         
         self.list_services={}
         
+        self.after(TIME_BASE, self.__tick)
+        
     def quit(self):
         self.master.destroy()
         self.do_destroy()
         
     def do_destroy(self, *_):
-        #print "ui.window: destroy"
-        mswitch.publish(self, "__destroy__")
         mswitch.publish(self, "__quit__")
         
+    def __tick(self, *_):
+        """
+        Clock 'tick'
+        """
+        if self.ag.pump():
+            self.quit()
+                    
     ## =========================================================================================
     ##
     ##  MESSAGE HANDLERS

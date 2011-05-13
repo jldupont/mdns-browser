@@ -208,7 +208,7 @@ class Agent(object):
         Message Pump
         """
         self.quit=process_queues(self.halting, self.host, self.agent_name, self.id, 
-                                self.mmap, self.responsesInterest,
+                                self.interest_map, self.responsesInterest,
                                 self.iq, self.isq, message_processor)
         return self.quit
 
