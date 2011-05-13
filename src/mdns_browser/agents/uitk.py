@@ -24,14 +24,11 @@ class UiWindow(Frame): #@UndefinedVariable
         self.opts=opts
         self.ag=Agent(self, TICKS_SECOND)
         
-        self.grid()
-        self.lb=Listbox(self)
-        self.lb.pack()
+        self.lb=Listbox(self.master)
+        self.lb.pack(fill=BOTH, expand=True)
         
-        self.bquit=Button(self, text="Quit", command=self.quit)
-        
-        self.lb.grid(row=0, column=0)
-        self.bquit.grid(row=1, column=0)
+        self.bquit=Button(self.master, text="Quit", command=self.quit)
+        self.bquit.pack()
         
         self.master.protocol("WM_DELETE_WINDOW", self.quit)
         

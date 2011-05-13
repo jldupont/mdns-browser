@@ -213,6 +213,9 @@ class Agent(object):
         """
         Message Pump
         """
+        if self.quit:
+            return
+        
         self.tg.input()
         self.quit=process_queues(self.halting, self.host, self.agent_name, self.id, 
                                 self.interest_map, self.responsesInterest,
