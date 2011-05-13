@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# @author: Jean-Lou Dupont
+# 
+cd src
+python mdnsbrowser.py

@@ -9,8 +9,9 @@ import webbrowser
 import mdns_browser.system.mswitch as mswitch
 from mdns_browser.system.base import Agent
 
-
 TIME_BASE=250
+TICKS_SECOND=1000/TIME_BASE
+
 
 class UiWindow(Frame): #@UndefinedVariable
     """
@@ -21,7 +22,7 @@ class UiWindow(Frame): #@UndefinedVariable
         Frame.__init__(self, None)
 
         self.opts=opts
-        self.ag=Agent(self)
+        self.ag=Agent(self, TICKS_SECOND)
         
         self.grid()
         self.lb=Listbox(self)
@@ -39,8 +40,8 @@ class UiWindow(Frame): #@UndefinedVariable
         self.after(TIME_BASE, self.__tick)
         
     def quit(self):
-        self.master.destroy()
         self.do_destroy()
+        self.master.destroy()
         
     def do_destroy(self, *_):
         mswitch.publish(self, "__quit__")
@@ -51,6 +52,8 @@ class UiWindow(Frame): #@UndefinedVariable
         """
         if self.ag.pump():
             self.quit()
+
+        self.after(TIME_BASE, self.__tick)
                     
     ## =========================================================================================
     ##
@@ -60,6 +63,7 @@ class UiWindow(Frame): #@UndefinedVariable
         """
         When a Service is added
         """
+        self.lb.insert(END, "%s:%s:%s" % (service_name, server_name, server_port))
             
     def h_service_expired(self, service_name, server_name, server_port):
         """

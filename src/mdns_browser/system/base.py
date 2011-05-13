@@ -176,7 +176,10 @@ class Agent(object):
     
     @param host: the object were messages are dispatched
     """
-    def __init__(self, host, debug=False):
+    def __init__(self, host, ticks_second, debug=False):
+        
+        self.ticks_second=ticks_second
+        self.tg=TickGenerator(self.ticks_second, self._gen_tick)
         
         self.quit=False
         self.halting=False
@@ -203,10 +206,14 @@ class Agent(object):
         if not self.halting:
             mswitch.publish(self.id, msgType, *pargs, **kargs)
     
+    def _gen_tick(self, *p):
+        self.pub("__tick__", *p)
+    
     def pump(self):
         """
         Message Pump
         """
+        self.tg.input()
         self.quit=process_queues(self.halting, self.host, self.agent_name, self.id, 
                                 self.interest_map, self.responsesInterest,
                                 self.iq, self.isq, message_processor)
