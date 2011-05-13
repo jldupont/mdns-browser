@@ -43,8 +43,8 @@ from mdns_browser.agents import cache
 #from mdns_browser.agents.ui import UiAgent
 from mdns_browser.agents.uitk import UiWindow
 
-mswitch.debugging_mode=True
-mswitch.observe_mode=True
+#mswitch.debugging_mode=True
+#mswitch.observe_mode=True
 
 def main():
     try:

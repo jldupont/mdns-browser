@@ -24,10 +24,9 @@ class UiWindow(Frame): #@UndefinedVariable
         self.opts=opts
         self.ag=Agent(self, TICKS_SECOND)
         
-        self.master.config(width=100)
-        
         self.lb=Listbox(self.master)
         self.lb.pack(fill=BOTH, expand=True)
+        self.lb.bind("<Double-Button-1>", self._dblClick)
         
         self.bquit=Button(self.master, text="Quit", command=self.quit)
         self.bquit.pack()
@@ -45,6 +44,9 @@ class UiWindow(Frame): #@UndefinedVariable
     def do_destroy(self, *_):
         mswitch.publish(self, "__quit__")
         
+    def _dblClick(self, *_):
+        print self.lb.curselection()
+        
     def __tick(self, *_):
         """
         Clock 'tick'
@@ -58,11 +60,11 @@ class UiWindow(Frame): #@UndefinedVariable
     ##
     ##  MESSAGE HANDLERS
     ##
-    def h_service(self, service_name, server_name, server_port, addresses):
+    def h_service(self, *p):
         """
         When a Service is added
         """
-        self.lb.insert(END, "%s:%s:%s" % (service_name, server_name, server_port))
+        self.add_service(*p)
             
     def h_service_expired(self, service_name, server_name, server_port):
         """
@@ -72,7 +74,9 @@ class UiWindow(Frame): #@UndefinedVariable
     ## =========================================================================================
         
         
-    def add_service(self, service_name, server_name, server_port, addresses):
+    def add_service(self, *p):
+        
+        service_name, server_name, server_port, addresses = p
         
         entry=self.list_services.get((service_name, server_name), None)
         if entry is not None:
@@ -85,6 +89,8 @@ class UiWindow(Frame): #@UndefinedVariable
                                             "ipv4":  addresses["ipv4"], 
                                             "port":  server_port
                                             }
+            self.lb.insert(END, self.to_string(*p))
+            
         
     def remove_service(self, service_name, server_name, server_port):
         #print "!! Ui Window: removing: %s " % service_name
@@ -92,6 +98,19 @@ class UiWindow(Frame): #@UndefinedVariable
             del self.list_services[(service_name, server_name)]
         except:
             pass
+
+    def to_string(self, *p):
+        """
+        Format compatible for listing in ListBox
+        """
+        return "%s  %s  %s  %s" % p
+        
+    def from_string(self, input):
+        """
+        Reverse format from ListBox
+        """
+        parts = input.split(' ')
+        return parts
 
 
     def row_activated(self, tv, path, *_):
@@ -114,9 +133,3 @@ class UiWindow(Frame): #@UndefinedVariable
 
         
         
-if __name__=="__main__":
-    ui=UiWindow()
-    ui.mainloop()
-    print "end!"
-    mswitch.quit()
-    sys.exit()
