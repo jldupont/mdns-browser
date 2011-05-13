@@ -24,6 +24,8 @@ class UiWindow(Frame): #@UndefinedVariable
         self.opts=opts
         self.ag=Agent(self, TICKS_SECOND)
         
+        self.master.config(width=100)
+        
         self.lb=Listbox(self.master)
         self.lb.pack(fill=BOTH, expand=True)
         
