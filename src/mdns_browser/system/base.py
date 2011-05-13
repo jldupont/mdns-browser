@@ -26,12 +26,13 @@ import uuid
 
 import mswitch
 
-__all__=["AgentThreadedBase", "AgentThreadedWithEvents", "debug", "debug_interest" 
-         "mdispatch", 
-         "process_queues", "message_processor"]
+__all__=["Agent", "AgentThreadedBase", "AgentThreadedWithEvents", 
+         "debug", "debug_interest", 
+         "mdispatch", "process_queues", "message_processor"]
 
 debug=False
 debug_interest=False
+
 
 
 def mdispatch(obj, this_source, envelope):
@@ -166,6 +167,53 @@ def message_processor(src_agent, agent_name, agent_id, interest_map, responsesIn
                 interest_map[mtype]=handled
         
     return quit
+
+
+
+class Agent(object):
+    """
+    Base class for non-threaded agent
+    
+    @param host: the object were messages are dispatched
+    """
+    def __init__(self, host, debug=False):
+        
+        self.quit=False
+        self.halting=False
+        self.debug=debug
+        
+        ## Messaging related
+        self.interest_map={}
+        self.responsesInterest=[]
+        self.id = uuid.uuid1()
+        self.iq = Queue()
+        self.isq= Queue()
+        
+        self.agent_name=str(self.__class__).split(".")[-1][:-2]
+        self.host=host
+        
+        self._setup()
+        
+    def _setup(self):
+        mswitch.subscribe(self.id, self.iq, self.isq)
+        
+    def pub(self, msgType, *pargs, **kargs):
+        """ Message Publication facility
+        """
+        if not self.halting:
+            mswitch.publish(self.id, msgType, *pargs, **kargs)
+    
+    def pump(self):
+        """
+        Message Pump
+        """
+        self.quit=process_queues(self.halting, self.host, self.agent_name, self.id, 
+                                self.mmap, self.responsesInterest,
+                                self.iq, self.isq, message_processor)
+        return self.quit
+
+
+
 
 class AgentThreadedBase(Thread):
     """

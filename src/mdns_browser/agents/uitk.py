@@ -7,7 +7,7 @@ from Tkinter import *
 import webbrowser
 
 import mdns_browser.system.mswitch as mswitch
-from mdns_browser.system.ui_base import UiAgentBase
+from mdns_browser.system.ui_base import Agent
 
 
 class UiWindow(Frame): #@UndefinedVariable
@@ -17,6 +17,8 @@ class UiWindow(Frame): #@UndefinedVariable
     """
     def __init__(self):
         Frame.__init__(self, None)
+        
+        self.ag=Agent(self)
         
         self.grid()
         self.lb=Listbox(self)
@@ -39,6 +41,23 @@ class UiWindow(Frame): #@UndefinedVariable
         #print "ui.window: destroy"
         mswitch.publish(self, "__destroy__")
         mswitch.publish(self, "__quit__")
+        
+    ## =========================================================================================
+    ##
+    ##  MESSAGE HANDLERS
+    ##
+    def h_service(self, service_name, server_name, server_port, addresses):
+        """
+        When a Service is added
+        """
+            
+    def h_service_expired(self, service_name, server_name, server_port):
+        """
+        When a Service turns expired
+        """
+    
+    ## =========================================================================================
+        
         
     def add_service(self, service_name, server_name, server_port, addresses):
         
@@ -80,46 +99,9 @@ class UiWindow(Frame): #@UndefinedVariable
         return False
 
 
-class UiAgent(UiAgentBase):
-    def __init__(self, time_base, opts={}):
-        UiAgentBase.__init__(self, time_base, ui_window_class=UiWindow, opts=opts)
-        
-        self.window = UiWindow()
-        
-    def do_updates(self):
-        if self.window is not None:
-            self.pub("services?")
-        
-    def h_service(self, service_name, server_name, server_port, addresses):
-        
-        ## Window might not be shown
-        if self.window is None:
-            return
-        
-        try:    
-            self.window.add_service(service_name, server_name, server_port, addresses)
-        except Exception,e:
-            self.log("w", "Ui Window Error whilst adding a service (%s)" % e)
-            
-    def h_service_expired(self, service_name, server_name, server_port):
-        """
-        """
-        ## Window might not be shown
-        if self.window is None:
-            return
-
-        try:
-            self.window.remove_service(service_name, server_name, server_port)
-        except Exception,e:
-            self.log("w", "Ui Window Error whilst removing a service (%s)" % e)
-    
-    
-    def h___destroy__(self, *_):
-        self.window=None
         
         
 if __name__=="__main__":
-    import sys
     ui=UiWindow()
     ui.mainloop()
     print "end!"
