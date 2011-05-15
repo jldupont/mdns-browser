@@ -13,7 +13,7 @@
     @author: jldupont
 """
 _MDNS_ADDR = '224.0.0.251'
-_MDNS_PORT = 5353;
+_MDNS_PORT = 5353
 _MAX_MSG_ABSOLUTE = 8972
 
 _SELECT_TIMEOUT=0.5

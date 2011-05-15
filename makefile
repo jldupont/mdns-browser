@@ -26,6 +26,10 @@ wzip:
 	cd src && python setup_exe.py py2exe
 	7z a -tzip mdns_browser-win32 ./src/dist/*
 	
+pypi:
+	@echo "Uploading to Pypi"
+	python setup.py sdist upload
+	
 install_linux:
 	@echo "Installing in ${INSTALL_DIR}"
 	@install -d ${INSTALL_DIR}
