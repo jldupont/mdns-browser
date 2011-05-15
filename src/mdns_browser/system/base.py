@@ -338,7 +338,7 @@ class AgentThreadedBase(Thread):
         while not self.quit and not quit:
             quit=self.runloop()
         
-        ##self._pub("__agent__", self.agent_name, self.id, "stop")    
+        self._pub("__halted__", self.agent_name, self.id)    
         print "Agent(%s) (%s) ending" % (self.agent_name, self.id)
                 
             

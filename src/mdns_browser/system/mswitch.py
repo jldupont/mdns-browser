@@ -10,7 +10,8 @@
     @revised: June 18, 2010
     @revised: August 22, 2010 :  filtered-out "send to self" case 
     @revised: August 23, 2010 :  added "snooping mode"   
-    @reviseD: January 10, 2011:  added "halting" operational mode
+    @revised: January 10, 2011:  added "halting" operational mode
+    @revided: May 15, 2011    :  added better winding-down support 
 """
 
 from threading import Thread
@@ -38,6 +39,7 @@ class CentralSwitch(Thread):
     def __init__(self):
         Thread.__init__(self)
         
+        self.quitting=False
         self.halting=False
         #self.rmap={} ## debug only
         
@@ -47,6 +49,10 @@ class CentralSwitch(Thread):
         
         ## system queue - high priority
         self.isq=Queue()
+        
+        ## Agent tracking
+        self.agent_count=0
+        self.agent_halted_count=0
     
     def run(self):
         """
@@ -73,17 +79,29 @@ class CentralSwitch(Thread):
                 try:
                     envelope=self.isq.get(block=False)
                     orig, mtype, payload=envelope
+
+                    if mtype != "__tick__" and debugging_mode:
+                        print "mswitch: mtype(%s)" % mtype
                     
                     if mtype=="__interest__":
                         self.do_interest(payload)
                         continue
 
                     self.do_pub(orig, mtype, payload)
+                    
+                    if mtype=="__agent__":
+                        self.agent_count = self.agent_count + 1
+                        
+                    if mtype=="__halted__":
+                        self.agent_halted_count = self.agent_halted_count + 1
+                        if self.agent_count==self.agent_halted_count:
+                            quit=True
+                    
                     ## We needed to give a chance to
                     ## all threads to exit before
                     ## committing "hara-kiri"
                     if mtype=="__quit__":
-                        quit=True
+                        self.quitting=True
                         break
 
                     if mtype=="__halt__":
@@ -106,8 +124,8 @@ class CentralSwitch(Thread):
                     else:
                         self.do_pub(orig, mtype, payload)
 
-                    #if mtype != "tick":
-                    #    print "mswitch: mtype(%s)" % mtype
+                    if mtype != "__tick__" and debugging_mode:
+                        print "mswitch: mtype(%s)" % mtype
                     
                     ## Only processed a "burst" of low priority messages
                     ##  before checking the "high priority" queue

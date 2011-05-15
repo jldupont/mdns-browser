@@ -21,6 +21,8 @@ class UiWindow(Frame): #@UndefinedVariable
     def __init__(self, opts):
         Frame.__init__(self, None)
 
+        self.master.title("MDNS Browser")
+
         self.opts=opts
         self.ag=Agent(self, TICKS_SECOND)
         
@@ -45,7 +47,19 @@ class UiWindow(Frame): #@UndefinedVariable
         mswitch.publish(self, "__quit__")
         
     def _dblClick(self, *_):
-        print self.lb.curselection()
+        index=self.lb.curselection()
+        entry=self.lb.get(index)
+        try:
+            entry=self.from_string(entry)
+            print entry
+            _service_name, _server_name, port, address = entry
+            url="http://%s:%s/" % (address, port)
+            webbrowser.open(url, new=0, autoraise=True)
+        except Exception, e:
+            """ Shouldn't happen but just in case...
+            """
+            print "ERROR: %s" % e
+            
         
     def __tick(self, *_):
         """
@@ -66,10 +80,14 @@ class UiWindow(Frame): #@UndefinedVariable
         """
         self.add_service(*p)
             
-    def h_service_expired(self, service_name, server_name, server_port):
+    def h_service_expired(self, *p):
         """
         When a Service turns expired
         """
+        self.remove_service(*p)
+        self.lb.delete(0, END)
+        for entry in self.list_services:
+            self.lb.insert(END, *entry)
     
     ## =========================================================================================
         
@@ -84,12 +102,16 @@ class UiWindow(Frame): #@UndefinedVariable
         
         #print "!! Ui Window: adding service: %s" % service_name 
         if self._filtered(service_name):
+            address_v4=addresses["ipv4"]
+            
             self.list_services[(service_name, server_name)]={
                                             "server_name": server_name, 
                                             "ipv4":  addresses["ipv4"], 
                                             "port":  server_port
                                             }
-            self.lb.insert(END, self.to_string(*p))
+            self.lb.insert(END, self.to_string(service_name, server_name, server_port, address_v4))
+        else:
+            print "INFO: filtered out: %s" % service_name
             
         
     def remove_service(self, service_name, server_name, server_port):
@@ -103,7 +125,7 @@ class UiWindow(Frame): #@UndefinedVariable
         """
         Format compatible for listing in ListBox
         """
-        return "%s  %s  %s  %s" % p
+        return "%s %s %s %s" % p
         
     def from_string(self, input):
         """
@@ -112,13 +134,6 @@ class UiWindow(Frame): #@UndefinedVariable
         parts = input.split(' ')
         return parts
 
-
-    def row_activated(self, tv, path, *_):
-        entry=self.list_services[path]
-        _service_name, _server_name, address, port=entry
-        #print ">> selected: %s" % service_name
-        url="http://%s:%s/" % (address, port)
-        webbrowser.open(url, new=0, autoraise=True)
 
     def _filtered(self, service_name):
         filters=self.opts["service_filters"]

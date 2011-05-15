@@ -27,11 +27,6 @@ sys.path.insert(0, cp)
 from mdns_browser.system.config import Configuration
 cfg = Configuration(os.path.join(cp, "config"))
                     
-#import gobject  
-#import gtk
-
-#gobject.threads_init()  #@UndefinedVariable
-
 from mdns_browser.system import mswitch
 from mdns_browser.agents import sup
 from mdns_browser.agents import debug
@@ -40,17 +35,14 @@ from mdns_browser.agents import logger
 from mdns_browser.agents import querier
 from mdns_browser.agents import listener
 from mdns_browser.agents import cache
-#from mdns_browser.agents.ui import UiAgent
 from mdns_browser.agents.uitk import UiWindow
 
 #mswitch.debugging_mode=True
-#mswitch.observe_mode=True
+mswitch.observe_mode=True
+
 
 def main():
     try:
-        #from mdns_browser.agents.tray import TrayAgent
-        #help_url=cfg.get("help", "url", HELP_URL)
-        #_ta=TrayAgent(APP_NAME, help_url)
 
         filters=cfg.get("service", "filters", "")
         try:     filterList=filters.split(",")
