@@ -32,6 +32,7 @@ import socket
 import threading
 import select
 import traceback
+import os
 
 __all__ = ["Zeroconf", "ServiceInfo", "ServiceBrowser"]
 
@@ -50,6 +51,7 @@ _BROWSER_TIME = 500
 # Some DNS constants
     
 _MDNS_ADDR = '224.0.0.251'
+_MDNS_ADDRv6 = 'ff02::fb'
 _MDNS_PORT = 5353;
 _DNS_PORT = 53;
 _DNS_TTL = 60 * 60; # one hour default TTL
@@ -788,54 +790,39 @@ class Engine(threading.Thread):
         self.zeroconf = zeroconf
         self.readers = {} # maps socket to reader
         self.timeout = 5
-        self.condition = threading.Condition()
+        self.notify_pipe = os.pipe() # used for immediate unblocking
         self.start()
 
     def run(self):
         while not globals()['_GLOBAL_DONE']:
             rs = self.getReaders()
-            if len(rs) == 0:
-                # No sockets to manage, but we wait for the timeout
-                # or addition of a socket
-                #
-                self.condition.acquire()
-                self.condition.wait(self.timeout)
-                self.condition.release()
-            else:
-                try:
-                    rr, wr, er = select.select(rs, [], [], self.timeout)
-                    for socket in rr:
-                        try:
-                            self.readers[socket].handle_read()
-                        except:
-                            # Ignore errors that occur on shutdown
-                            pass
-                except:
-                    pass
+            rs.append(self.notify_pipe[0])
+            try:
+                rr, wr, er = select.select(rs, [], [], self.timeout)
+                for socket in rr:
+                    if socket == self.notify_pipe[0]:
+                        os.read(self.notify_pipe[0]) # just read off the buffer
+                    try:
+                        self.readers[socket].handle_read()
+                    except:
+                        # Ignore errors that occur on shutdown
+                        pass
+            except:
+                pass
 
     def getReaders(self):
-        result = []
-        self.condition.acquire()
-        result = self.readers.keys()
-        self.condition.release()
-        return result
+        return self.readers.keys()
     
     def addReader(self, reader, socket):
-        self.condition.acquire()
         self.readers[socket] = reader
-        self.condition.notify()
-        self.condition.release()
+        self.notify()
 
     def delReader(self, socket):
-        self.condition.acquire()
         del(self.readers[socket])
-        self.condition.notify()
-        self.condition.release()
+        self.notify()
 
     def notify(self):
-        self.condition.acquire()
-        self.condition.notify()
-        self.condition.release()
+        os.write(self.notify_pipe[1], "notify")
 
 class Listener(object):
     """A Listener is used by this module to listen on the multicast
@@ -850,7 +837,9 @@ class Listener(object):
         self.zeroconf.engine.addReader(self, self.zeroconf.socket)
 
     def handle_read(self):
-        data, (addr, port) = self.zeroconf.socket.recvfrom(_MAX_MSG_ABSOLUTE)
+        data, addr = self.zeroconf.socket.recvfrom(_MAX_MSG_ABSOLUTE)
+        port = addr[1]
+        addr = addr[0]
         self.data = data
         msg = DNSIncoming(data)
         if msg.isQuery():
@@ -858,6 +847,7 @@ class Listener(object):
             #
             if port == _MDNS_PORT:
                 self.zeroconf.handleQuery(msg, _MDNS_ADDR, _MDNS_PORT)
+
             # If it's not a multicast query, reply via unicast
             # and multicast
             #
@@ -1180,16 +1170,22 @@ class Zeroconf(object):
 
     Supports registration, unregistration, queries and browsing.
     """
-    def __init__(self, bindaddress=None):
+    def __init__(self, bindaddress=None, ttl=255, oneshot=False):
         """Creates an instance of the Zeroconf class, establishing
         multicast communications, listening and reaping threads."""
         globals()['_GLOBAL_DONE'] = 0
+        self.address_family = socket.AF_INET
         if bindaddress is None:
             self.intf = socket.gethostbyname(socket.gethostname())
         else:
-            self.intf = bindaddress
+            try: # For IPv6 bindaddress is an ethernet device index
+                self.intf = int(bindaddress)
+                self.address_family = socket.AF_INET6
+            except ValueError: # IPv4
+                self.intf = bindaddress
+            
         self.group = ('', _MDNS_PORT)
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.socket = socket.socket(self.address_family, socket.SOCK_DGRAM)
         try:
             self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
@@ -1204,17 +1200,34 @@ class Zeroconf(object):
             # work as expected.
             #
             pass
-        self.socket.setsockopt(socket.SOL_IP, socket.IP_MULTICAST_TTL, 255)
-        self.socket.setsockopt(socket.SOL_IP, socket.IP_MULTICAST_LOOP, 1)
-        try:
-            self.socket.bind(self.group)
-        except:
-            # Some versions of linux raise an exception even though
-            # the SO_REUSE* options have been set, so ignore it
-            #
-            pass
-        self.socket.setsockopt(socket.SOL_IP, socket.IP_MULTICAST_IF, socket.inet_aton(self.intf) + socket.inet_aton('0.0.0.0'))
-        self.socket.setsockopt(socket.SOL_IP, socket.IP_ADD_MEMBERSHIP, socket.inet_aton(_MDNS_ADDR) + socket.inet_aton('0.0.0.0'))
+        if self.address_family == socket.AF_INET:
+            self.socket.setsockopt(socket.SOL_IP, socket.IP_MULTICAST_TTL, ttl)
+            self.socket.setsockopt(socket.SOL_IP, socket.IP_MULTICAST_LOOP, 1)
+            try:
+                self.socket.bind(self.group)
+            except:
+                # Some versions of linux raise an exception even though
+                # the SO_REUSE* options have been set, so ignore it
+                #
+                pass
+            self.socket.setsockopt(socket.SOL_IP, socket.IP_MULTICAST_IF,
+                socket.inet_aton(self.intf) + socket.inet_aton('0.0.0.0'))
+            self.socket.setsockopt(socket.SOL_IP, socket.IP_ADD_MEMBERSHIP,
+                socket.inet_aton(_MDNS_ADDR) + socket.inet_aton('0.0.0.0'))
+        else: # IPv6
+            self.socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_MULTICAST_HOPS, ttl)
+            self.socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_MULTICAST_LOOP, 1)
+            try:
+                self.socket.bind(self.group)
+            except:
+                # Some versions of linux raise an exception even though
+                # the SO_REUSE* options have been set, so ignore it
+                #
+                pass
+            self.socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_MULTICAST_IF,
+                struct.pack('I', self.intf))
+            self.socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_JOIN_GROUP,
+                socket.inet_pton(socket.AF_INET6, _MDNS_ADDRv6) + struct.pack('I', self.intf))
 
         self.listeners = []
         self.browsers = []
@@ -1226,13 +1239,8 @@ class Zeroconf(object):
         
         self.engine = Engine(self)
         self.listener = Listener(self)
-        self.reaper = Reaper(self)
-
-    def isLoopback(self):
-        return self.intf.startswith("127.0.0.1")
-
-    def isLinklocal(self):
-        return self.intf.startswith("169.254.")
+        if not oneshot:
+            self.reaper = Reaper(self)
 
     def wait(self, timeout):
         """Calling thread waits for a given number of milliseconds or
@@ -1459,12 +1467,17 @@ class Zeroconf(object):
             out.id = msg.id
             self.send(out, addr, port)
 
-    def send(self, out, addr = _MDNS_ADDR, port = _MDNS_PORT):
+    def send(self, out, addr = None, port = _MDNS_PORT):
         """Sends an outgoing packet."""
         # This is a quick test to see if we can parse the packets we generate
         #temp = DNSIncoming(out.packet())
+        if self.address_family == socket.AF_INET6:
+            addr = (addr or _MDNS_ADDRv6, port, 0, 0,)
+        else:
+            addr = (addr or _MDNS_ADDR, port,)
+
         try:
-            bytes_sent = self.socket.sendto(out.packet(), 0, (addr, port))
+            bytes_sent = self.socket.sendto(out.packet(), 0, addr)
         except:
             # Ignore this, it may be a temporary loss of network connection
             pass
@@ -1477,7 +1490,12 @@ class Zeroconf(object):
             self.notifyAll()
             self.engine.notify()
             self.unregisterAllServices()
-            self.socket.setsockopt(socket.SOL_IP, socket.IP_DROP_MEMBERSHIP, socket.inet_aton(_MDNS_ADDR) + socket.inet_aton('0.0.0.0'))
+            if self.address_family == socket.AF_INET:
+                self.socket.setsockopt(socket.SOL_IP, socket.IP_DROP_MEMBERSHIP,
+                    socket.inet_aton(_MDNS_ADDR) + socket.inet_aton('0.0.0.0'))
+            else:
+                self.socket.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_LEAVE_GROUP,
+                    socket.inet_pton(socket.AF_INET6, _MDNS_ADDRv6) + struct.pack('I', self.intf))
             self.socket.close()
             
 # Test a few module features, including service registration, service
